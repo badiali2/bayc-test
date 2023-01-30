@@ -21,9 +21,11 @@ export class ContractsService {
       closestBlockNumber = await this.adapterService.getClosestBlock(epochTime);
     }
 
-    for (let i = 0; i < owners.length; i++) {
-      const owner = owners[i];
-      ethValue += await this.adapterService.getETHValue(owner, closestBlockNumber);
+    const chunkSize = 200;
+    for (let i = 0; i < owners.length; i += chunkSize) {
+      const chunk = owners.slice(i, i + chunkSize);
+      let result = await Promise.all(chunk.map(address => this.adapterService.getETHValue(address, closestBlockNumber)));
+      ethValue += result.reduce((partialSum, a) => partialSum + a, 0);
     }
     return ethValue;
   }

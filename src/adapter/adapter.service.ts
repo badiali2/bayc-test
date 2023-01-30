@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Web3Service } from "nest-web3";
 import { Network, Alchemy } from "alchemy-sdk";
 
+const Web3 = require('web3');
+
 @Injectable()
 export class AdapterService {
     private client = this.web3Service.getClient('eth');
@@ -9,6 +11,7 @@ export class AdapterService {
         apiKey: "xlWyVz94Kt63IUVNUsoJZ_DpbXXKu-7t",
         network: Network.ETH_MAINNET,
     });
+    private web3 = new Web3("https://eth.llamarpc.com");
     constructor(
         private readonly web3Service: Web3Service
     ) {
@@ -19,8 +22,18 @@ export class AdapterService {
         if (["0x000000000000000000000000000000000000dead", "0x0000000000000000000000000000000000000000"].includes(address)) {
             return 0;
         }
-        let ether = await this.client.eth.getBalance(address, blockNumber)
-        return +ether * (10 ** -18);
+        let tryCount = 0;
+        while(tryCount < 2) {
+            try {
+                let ether = await this.client.eth.getBalance(address, blockNumber)
+                return +this.client.utils.fromWei(ether); 
+            } catch (err) {
+                console.log(err.message);
+                console.log("address failed " + address);
+                tryCount++;
+            }
+        }
+        console.log("fully failed address" + address);
     }
 
     async getNftOwners(address: string): Promise<string[]> {

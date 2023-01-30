@@ -1,8 +1,10 @@
-import { IsNumber } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsNumber, IsNumberString } from "class-validator";
 
 export class GetEtherValueQuery {
-    @IsNumber()
-    public age: number;
+    @ApiPropertyOptional()
+    @IsNumberString()
+    public epoch: number;
 }
 
 export class GetEtherValueResponse {
