@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Web3Service } from "nest-web3";
 import { Network, Alchemy } from "alchemy-sdk";
-import { BlockTransactionString } from 'web3-eth';
 
 @Injectable()
 export class AdapterService {
@@ -17,6 +16,9 @@ export class AdapterService {
     }
 
     async getETHValue(address: string, blockNumber?: number): Promise<number> {
+        if (["0x000000000000000000000000000000000000dead", "0x0000000000000000000000000000000000000000"].includes(address)) {
+            return 0;
+        }
         let ether = await this.client.eth.getBalance(address, blockNumber)
         return +ether * (10 ** -18);
     }
